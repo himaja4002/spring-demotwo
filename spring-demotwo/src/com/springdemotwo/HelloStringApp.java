@@ -14,6 +14,8 @@ public class HelloStringApp {
 		Coach theCoach = context.getBean("myCoach",Coach.class);
 		//call the method
 		System.out.println(theCoach.getDailyWorkout());
+		//call new method
+		System.out.println(theCoach.getDailyFortune());
 		//close the container
 		context.close();
 
