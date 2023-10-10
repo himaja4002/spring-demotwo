@@ -1,40 +1,25 @@
-def merge_json(original, filters):
-    # Load the original JSON structure
-    original_data = json.loads(original["config"])
-    
-    # Extract the encodings from the original JSON structure
-    encodings = original_data[0]["encodings"]
+import plotly.express as px
 
-    # Iterate over each filter in filters.json
-    for filter_item in filters:
-        name = filter_item["name"]
-        rule = filter_item["rule"]
+with st.expander("Data Preview"):
+    st.write(filtered_data.head())
 
-        # Search for the corresponding dragId in the original.json for the filter name
-        matching_encodings = [e for e in encodings["dimensions"] if e["name"] == name]
+st.header("Data Visualization")
+columns = df1.columns
+x_axis = st.selectbox("Select X Axis", columns)
+y_axis = st.selectbox("Select Y Axis", columns)
 
-        if matching_encodings:
-            encoding = matching_encodings[0]
-            encoding["rule"] = rule
-            # Add this encoding to the filters list in the original JSON
-            if "filters" not in encodings:
-                encodings["filters"] = []
-            encodings["filters"].append(encoding)
+# Now, using plotly, you can visualize this
+fig = px.scatter(df1, x=x_axis, y=y_axis, title=f"{y_axis} vs {x_axis}")
+st.plotly_chart(fig)
 
-    original["config"] = json.dumps(original_data)
-    return original
+# Data Quality - Missing Values
+st.header("Data Quality Analysis")
 
-# Read the original.json and filters.json directly from the directory
-with open("original.json", "r") as f:
-    original = json.load(f)
-
-with open("filters.json", "r") as f:
-    filters = json.load(f)
-
-# Combine the original and filters JSON
-result = merge_json(original, filters)
-
-# Write the result to updated.json
-with open("updated.json", "w") as f:
-    json.dump(result, f)
-
+missing_values = df1.isnull().sum()
+fig_missing = px.bar(missing_values, title="Missing Values in Each Column")
+st.plotly_chart(fig_missing)
+# Assuming a categorical column for demonstration
+categorical_col = st.selectbox("Select a Categorical Column for Distribution Analysis", columns)
+value_counts = df1[categorical_col].value_counts()
+fig_value_counts = px.bar(value_counts, title=f"Distribution of {categorical_col}")
+st.plotly_chart(fig_value_counts)
