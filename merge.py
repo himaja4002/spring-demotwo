@@ -1,69 +1,46 @@
-import plotly.express as px
+# Set a visually pleasing theme for plotly
+import plotly.io as pio
 
-with st.expander("Data Preview"):
-    st.write(filtered_data.head())
+pio.templates.default = "plotly_dark"
 
-st.header("Data Visualization")
-columns = df1.columns
-x_axis = st.selectbox("Select X Axis", columns)
-y_axis = st.selectbox("Select Y Axis", columns)
+# Organize the layout using sidebar for controls and main area for visualizations
+st.sidebar.title("Visualization Controls")
+st.title("Interactive Data Analysis Dashboard")
 
-# Now, using plotly, you can visualize this
-fig = px.scatter(df1, x=x_axis, y=y_axis, title=f"{y_axis} vs {x_axis}")
-st.plotly_chart(fig)
+# Toggle buttons for user to select which visualization to display
+show_data_visualization = st.sidebar.checkbox("Data Visualization", value=True)
+show_data_quality = st.sidebar.checkbox("Data Quality Analysis", value=True)
+show_distribution_analysis = st.sidebar.checkbox("Distribution Analysis", value=True)
+
+# Visualization - Interactive Plots
+if show_data_visualization:
+    st.header("Data Visualization")
+    columns = df1.columns
+    x_axis = st.sidebar.selectbox("Select X Axis for Data Visualization", columns, key='x_select')
+    y_axis = st.sidebar.selectbox("Select Y Axis for Data Visualization", columns, key='y_select')
+    
+    # Enhanced scatter plot with color scale based on Y values, size adjustments, and opacity for better visualization
+    fig = px.scatter(df1, x=x_axis, y=y_axis, color=y_axis, title=f"{y_axis} vs {x_axis}", 
+                     color_continuous_scale=px.colors.sequential.Plasma, size_max=15, opacity=0.7)
+    st.plotly_chart(fig, use_container_width=True)
 
 # Data Quality - Missing Values
-st.header("Data Quality Analysis")
+if show_data_quality:
+    st.header("Data Quality Analysis")
+    missing_values = df1.isnull().sum()
+    
+    # Enhancing the bar chart for missing values with customized colors
+    fig_missing = px.bar(missing_values, title="Missing Values in Each Column", color=missing_values,
+                         color_continuous_scale=px.colors.sequential.Reds)
+    st.plotly_chart(fig_missing, use_container_width=True)
 
-missing_values = df1.isnull().sum()
-fig_missing = px.bar(missing_values, title="Missing Values in Each Column")
-st.plotly_chart(fig_missing)
-# Assuming a categorical column for demonstration
-categorical_col = st.selectbox("Select a Categorical Column for Distribution Analysis", columns)
-value_counts = df1[categorical_col].value_counts()
-fig_value_counts = px.bar(value_counts, title=f"Distribution of {categorical_col}")
-st.plotly_chart(fig_value_counts)
-
-import altair as alt
-
-st.header("Data Visualization with Altair")
-
-columns = df1.columns
-x_axis = st.selectbox("Select X Axis for Altair", columns)
-y_axis = st.selectbox("Select Y Axis for Altair", columns)
-
-chart = alt.Chart(df1).mark_circle().encode(
-    x=x_axis,
-    y=y_axis,
-    tooltip=[x_axis, y_axis]
-).interactive()
-
-st.altair_chart(chart, use_container_width=True)
-
-st.header("Data Quality Analysis with Altair")
-
-missing_df = pd.DataFrame({
-    'Column': df1.columns,
-    'Missing Values': df1.isnull().sum()
-})
-
-missing_chart = alt.Chart(missing_df).mark_bar().encode(
-    x='Column',
-    y='Missing Values',
-    tooltip=['Column', 'Missing Values']
-).interactive()
-
-st.altair_chart(missing_chart, use_container_width=True)
-
-
-categorical_col = st.selectbox("Select a Categorical Column for Distribution Analysis with Altair", columns)
-value_counts = df1[categorical_col].value_counts().reset_index()
-value_counts.columns = [categorical_col, 'Count']
-
-category_chart = alt.Chart(value_counts).mark_bar().encode(
-    x=categorical_col,
-    y='Count',
-    tooltip=[categorical_col, 'Count']
-).interactive()
-
-st.altair_chart(category_chart, use_container_width=True)
+# Distribution Analysis - Categorical Columns
+if show_distribution_analysis:
+    st.header("Distribution Analysis")
+    categorical_col = st.sidebar.selectbox("Select a Categorical Column for Distribution Analysis", columns, key='cat_select')
+    value_counts = df1[categorical_col].value_counts()
+    
+    # Enhancing the bar chart for distribution with customized colors
+    fig_value_counts = px.bar(value_counts, title=f"Distribution of {categorical_col}", 
+                              color=value_counts, color_continuous_scale=px.colors.sequential.Agsunset)
+    st.plotly_chart(fig_value_counts, use_container_width=True)
