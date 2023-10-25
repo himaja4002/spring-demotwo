@@ -54,7 +54,9 @@ if show_relational_analysis:
         # Bar chart for one categorical column
         else:
             col = column_a if df1[column_a].dtype == 'object' else column_b
-            fig = px.bar(df1[col].value_counts().reset_index(), x='index', y=col, title=f"Counts of {col}")
+            counts_df = df1[col].value_counts().reset_index()
+            counts_df.columns = ['category', 'count']
+            fig = px.bar(counts_df, x='category', y='count', title=f"Counts of {col}")
             st.plotly_chart(fig, use_container_width=True)
 
     else:
@@ -67,18 +69,18 @@ if show_relational_analysis:
         # Display the scatter plot and the correlation
         st.plotly_chart(fig)
         st.write(f"Correlation coefficient between {column_a} and {column_b}: {correlation:.2f}")
-
-# Interpretation of correlation
-if correlation > 0.7: # Strong positive correlation
-    st.write(f"The attributes {column_a} and {column_b} have a strong positive correlation with a coefficient of {correlation:.2f}. This means they are directly proportional.")
-elif correlation > 0: # Weak positive correlation
-    st.write(f"The attributes {column_a} and {column_b} have a weak positive correlation with a coefficient of {correlation:.2f}.")
-elif correlation < -0.7: # Strong negative correlation
-    st.write(f"The attributes {column_a} and {column_b} have a strong negative correlation with a coefficient of {correlation:.2f}. This means they are inversely proportional.")
-elif correlation < 0: # Weak negative correlation
-    st.write(f"The attributes {column_a} and {column_b} have a weak negative correlation with a coefficient of {correlation:.2f}.")
-else: # No correlation
-    st.write(f"The attributes {column_a} and {column_b} do not have a linear correlation with a coefficient of {correlation:.2f}.")
+        # Calculate correlation coefficient
+        # Interpretation of correlation
+        if correlation > 0.7: # Strong positive correlation
+            st.write(f"The attributes {column_a} and {column_b} have a strong positive correlation with a coefficient of {correlation:.2f}. This means they are directly proportional.")
+        elif correlation > 0: # Weak positive correlation
+            st.write(f"The attributes {column_a} and {column_b} have a weak positive correlation with a coefficient of {correlation:.2f}.")
+        elif correlation < -0.7: # Strong negative correlation
+            st.write(f"The attributes {column_a} and {column_b} have a strong negative correlation with a coefficient of {correlation:.2f}. This means they are inversely proportional.")
+        elif correlation < 0: # Weak negative correlation
+            st.write(f"The attributes {column_a} and {column_b} have a weak negative correlation with a coefficient of {correlation:.2f}.")
+        else: # No correlation
+            st.write(f"The attributes {column_a} and {column_b} do not have a linear correlation with a coefficient of {correlation:.2f}.")
 # Sidebar Content
 st.sidebar.markdown("## Navigation", unsafe_allow_html=True)
 st.sidebar.markdown("------")
